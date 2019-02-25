@@ -40,14 +40,11 @@ OK you should be set.  Proceed to testing your starter code.
 
 Run server in a window
 
-'''
 * ./ssd myconfig.ini
-'''
 
 In another window, run the client:
-'''
+
 * ./ss myconfig.ini
-'''
 
 ## Ref article:
 http://storageconference.us/2010/Papers/MSST/Shvachko.pdf
