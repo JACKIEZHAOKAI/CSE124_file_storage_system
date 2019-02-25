@@ -1,0 +1,2 @@
+cat.jpg 7 h0 h1 h2 h3
+dog.txt 2 h0 h1
