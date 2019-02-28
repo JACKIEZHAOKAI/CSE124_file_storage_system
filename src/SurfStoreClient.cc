@@ -22,6 +22,7 @@
 #include "SurfStoreTypes.hpp"
 #include "SurfStoreClient.hpp"
 
+//for setting up a timer to simulate uploading a largefile  
 #include <chrono>
 #include <thread>
 
@@ -34,6 +35,7 @@ bool fileExists(const char* filename) {
 
 const list<string> DELETED_HASHLIST = { "0" };
 
+// constructor to set up a server using the config file 
 SurfStoreClient::SurfStoreClient(INIReader &t_config)
     : config(t_config), c(nullptr)
 {
@@ -70,6 +72,7 @@ SurfStoreClient::SurfStoreClient(INIReader &t_config)
     c = new rpc::client(serverhost, serverport);
 }
 
+// destructor
 SurfStoreClient::~SurfStoreClient()
 {
     if (c)
@@ -79,6 +82,12 @@ SurfStoreClient::~SurfStoreClient()
     }
 }
 
+// client calls sync() to sync files to server, serverl conditions might occurs
+/*
+    1   client creates new files/ modify files, server files not changed, upload all files 
+    2   clinet creates new files/ modify files, server files changed, abandon local changes, download files from the server
+    3   client no changes, server files changed, download files from the server
+*/ 
 void SurfStoreClient::sync()
 {
     auto log = logger();
@@ -95,13 +104,13 @@ void SurfStoreClient::sync()
         // skip index.txt and any file starting with .
         if (filename == "index.txt" || filename[0] == '.') { continue; }
 
-        list<string> new_hashlist; // create a hashlist for each file
+        list<string> new_hashlist;   // create a hashlist for each file
         list<string> blocks = get_blocks_from_file(filename);
 
         // for each file, compute that file’s hash list.
         // The last buffer less than the buffer size?
         for (const string& block : blocks) {
-            string blockhash = picosha2::hash256_hex_string(block); // compute hash for each block
+            string blockhash = picosha2::hash256_hex_string(block);
             new_hashlist.push_back(blockhash);
         }
 
@@ -373,9 +382,7 @@ void SurfStoreClient::set_local_fileinfo(string filename, FileInfo finfo)
     rename(bkp.c_str(), real.c_str());
 }
 
-/**
- * Get the data blocks from the file given by filename
- */
+//Get the data blocks from the file given by filename
 list<string> SurfStoreClient::get_blocks_from_file(string filename) {
     auto log = logger();
     log->info("getting data blocks from file '{}'", filename);
